@@ -59,6 +59,7 @@ def main(args):
                 seqs = []
     fp.close()
     print "Finished classifying"
+    print "Class scores written in: {}".format(outfile)
 
 
 
