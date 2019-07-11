@@ -49,7 +49,6 @@ def get_rc(seq):
     return "".join([complements.get(i,i) for i in rev])
 
 
-
 def mer2bits(kmer):
     ''' convert kmer to bit representation
     '''
@@ -59,13 +58,100 @@ def mer2bits(kmer):
     return bit_mer
 
 
-def count_kmers(seq, ks):
+# def count_kmers(seq, ks):
+#     ''' Count the k-mers in the sequence
+#         Return a dictionary of counts
+#         Assumes ks is sorted
+#     '''
+#
+#     kmer_counts = {k:{} for k in ks}
+#
+#     k_masks = [2**(2*k)-1 for k in ks]
+#     ind=0
+#     bit_mers = [0 for k in ks]
+#     rc_bit_mers = [0 for k in ks]
+#
+#     # get the first set of kmers
+#     while True:
+#         for i,k in enumerate(ks):
+#             try:
+#                 bit_mers[i] = mer2bits(seq[ind:ind+k])
+#                 rc_bit_mers[i] = mer2bits(get_rc(seq[ind:ind+k]))
+#                 canonical = min(bit_mers[i],rc_bit_mers[i])
+#                 kmer_counts[k][canonical] = kmer_counts[k].get(canonical,0)+1
+#             except:
+#                 ind += 1
+#                 break
+#         if k == ks[-1]:
+#             ind += 1
+#             break
+#     # count all other kmers
+#     while ind<=len(seq)-ks[-1]: # iterate through sequence until last k-mer for largest k
+#         for i,k in enumerate(ks):
+#             try:
+#                 c = nt_bits[seq[ind+k]]
+#                 rc = 3^c
+#                 bit_mers[i] = ((bit_mers[i]<<2)|c)&k_masks[i]
+#                 rc_bit_mers[i] = ((rc_bit_mers[i]>>2)|rc<<(2*k-2))
+#                 canonical = min(bit_mer,rc_bit_mer)
+#                 kmer_counts[k][canonical] = kmer_counts[k].get(canonical,0)+1
+#             except: # out of alphabet
+#                 ind += 1
+#                 # get the next set of legal kmers
+#                 while ind<=len(seq)-ks[-1]:
+#                     for i2,k2 in enumerate(ks):
+#                         try:
+#                             bit_mers[i2] = mer2bits(seq[ind:ind+k2])
+#                             rc_bit_mers[i2] = mer2bits(get_rc(seq[ind:ind+k2]))
+#                             canonical = min(bit_mers[i2],rc_bit_mers[i2])
+#                             kmer_counts[k2][canonical] = kmer_counts[k2].get(canonical,0)+1
+#                         except:
+#                             ind += 1
+#                             break
+#                     if k2 == ks[-1]:
+#                         ind += 1
+#                         break
+#         ind += 1 # move on to next letter in sequence
+#
+#     # count the last few kmers
+#     end = len(ks)-1
+#     for i in range(len(seq)-ks[-1]+1,len(seq)-ks[0]+1):
+#         for k in ks[:end]:
+#             kmer = seq[i:i+k]
+#             try:
+#                 canonical = min(mer2bits(kmer), mer2bits(get_rc(kmer)))
+#                 kmer_counts[k][canonical] = kmer_counts[k].get(canonical,0) + 1
+#             except:
+#                 pass
+#         end -= 1
+#
+#     return kmer_counts
+
+
+def get_kmer_lists(ks):
+    ''' Return a list of sorted lists of the lexicographically minimum of each kmer and
+    its reverse complement for all the values of k in ks
+    Assumes ks sorted increasing
+    '''
+    alphabet = 'ACGT'
+    all_low_kmers = []
+    for k in ks:
+        low_kmers = []
+        all_kmers = [''.join(kmer) for kmer in itertools.product(alphabet,repeat=k)]
+        for kmer in all_kmers:
+            low_kmers.append(min(mer2bits(kmer), mer2bits(get_rc(kmer))))
+        low_kmers = list(set(low_kmers)) # deduplicate
+        low_kmers.sort()
+        all_low_kmers.append(low_kmers)
+    return all_low_kmers
+
+def count_kmers(seq, ks, kmer_lists, kmer_inds):
     ''' Count the k-mers in the sequence
         Return a dictionary of counts
         Assumes ks is sorted
     '''
 
-    kmer_counts = {}
+    kmer_counts = {k:np.zeros(len(kmer_lists[i])) for i,k in enumerate(ks)}
 
     k_masks = [2**(2*k)-1 for k in ks]
     ind=0
@@ -76,45 +162,44 @@ def count_kmers(seq, ks):
     while True:
         for i,k in enumerate(ks):
             try:
-                bit_mer = mer2bits(seq[ind:ind+k])
-                rc_bit_mer = mer2bits(get_rc(seq[ind:ind+k]))
-                bit_mers[i] = bit_mer
-                rc_bit_mers[i] = rc_bit_mer
-                canonical = min(bit_mer,rc_bit_mer)
-                kmer_counts[canonical] = kmer_counts.get(canonical,0)+1
+                bit_mers[i] = mer2bits(seq[ind:ind+k])
+                rc_bit_mers[i] = mer2bits(get_rc(seq[ind:ind+k]))
+                canonical = min(bit_mers[i],rc_bit_mers[i])
+                kmer_counts[k][kmer_inds[k][canonical]] += 1.
             except:
                 ind += 1
+                break
         if k == ks[-1]:
             ind += 1
             break
-
-    while ind<=len(seq)-ks[-1]:
+    # count all other kmers
+    while ind<=len(seq)-ks[-1]: # iterate through sequence until last k-mer for largest k
         for i,k in enumerate(ks):
             try:
                 c = nt_bits[seq[ind+k]]
-                rc = complements[c]
+                rc = 3^c
                 bit_mers[i] = ((bit_mers[i]<<2)|c)&k_masks[i]
                 rc_bit_mers[i] = ((rc_bit_mers[i]>>2)|rc<<(2*k-2))
-                canonical = min(bit_mers[i],rc_bit_mers[i])
-                kmer_counts[canonical] = kmer_counts.get(canonical,0)+1
-                ind+=1
+                canonical = min(bit_mer,rc_bit_mer)
+                kmer_counts[k][kmer_inds[k][canonical]] += 1.
             except: # out of alphabet
-                ind += k
+                ind += 1
                 # get the next set of legal kmers
                 while ind<=len(seq)-ks[-1]:
                     for i2,k2 in enumerate(ks):
                         try:
-                            bit_mer = mer2bits(seq[ind:ind+k2])
-                            rc_bit_mer = mer2bits(get_rc(seq[ind:ind+k2]))
-                            bit_mers[i2] = bit_mer
-                            rc_bit_mers[i2] = rc_bit_mer
-                            canonical = min(bit_mer,rc_bit_mer)
-                            kmer_counts[canonical] = kmer_counts.get(canonical,0)+1
+                            bit_mers[i2] = mer2bits(seq[ind:ind+k2])
+                            rc_bit_mers[i2] = mer2bits(get_rc(seq[ind:ind+k2]))
+                            canonical = min(bit_mers[i2],rc_bit_mers[i2])
+                            kmer_counts[k2][kmer_inds[k2][canonical]] += 1.
                         except:
                             ind += 1
+                            break
                     if k2 == ks[-1]:
                         ind += 1
                         break
+        ind += 1 # move on to next letter in sequence
+
     # count the last few kmers
     end = len(ks)-1
     for i in range(len(seq)-ks[-1]+1,len(seq)-ks[0]+1):
@@ -122,7 +207,7 @@ def count_kmers(seq, ks):
             kmer = seq[i:i+k]
             try:
                 canonical = min(mer2bits(kmer), mer2bits(get_rc(kmer)))
-                kmer_counts[canonical] = kmer_counts.get(canonical,0) + 1
+                kmer_counts[k][kmer_inds[k][canonical]] += 1.
             except:
                 pass
         end -= 1
@@ -130,42 +215,72 @@ def count_kmers(seq, ks):
     return kmer_counts
 
 
-def get_kmer_list(ks):
-    ''' Return a sorted list of the lexicographically minimum of each kmer and
-    its reverse complement for all the values of k in ks
-    '''
-    alphabet = 'ACGT'
-    low_kmers = []
-    for k in ks:
-        all_kmers = [''.join(kmer) for kmer in itertools.product(alphabet,repeat=k)]
-        for kmer in all_kmers:
-            low_kmers.append(min(mer2bits(kmer), mer2bits(get_rc(kmer))))
-    #low_kmers = list(set(low_kmers))
-    low_kmers.sort()
-    return low_kmers
-
-
 def counts2freqs(kmer_counts, ks):
     ''' Return a vector of the frequencies of k-mer occurences in a sequence
     Parameters: kmer_counts - dictionary of the kmer counts for the sequence,
-                                or list of dictionaries for all the sequences
+                              or list of dictionaries for all the sequences
                 ks - sorted list of the k-mer lengths
     Returns numpy array of frequencies
     '''
-    kmers_list = get_kmer_list(ks)
-    print kmers_list
+
     print "Converting counts to frequencies"
 
     if isinstance(kmer_counts,dict): # single sequence
-        count_list = [kmer_counts.get(kmer,0) for kmer in kmers_list]
-        kmer_freqs = [count_list]
+        all_kmer_freqs = []
+        for i,k in enumerate(ks):
+            count_list = kmer_counts[k]
+            count_sum = np.sum(count_list)
+            if count_sum != 0:
+                count_list = count_list/float(count_sum)
+            all_kmer_freqs = np.hstack([all_kmer_freqs,count_list])
 
     elif isinstance(kmer_counts,list): # set of sequences
-        kmer_freqs = np.zeros((len(kmer_counts),len(kmers_list)))
-        for i,k in enumerate(kmer_counts):
-            kmer_freqs[i,:] = [k.get(kmer,0) for kmer in kmers_list]
+        kmer_freqs_mat = np.zeros((len(kmer_counts),sum([len(kmer_counts[0][k]) for k in ks])))
+        for i,c in enumerate(kmer_counts):
+            start_ind = 0
+            for j,k in enumerate(ks):
+                count_list = c[k]
+                count_sum = np.sum(count_list)
+                if count_sum != 0:
+                    count_list = count_list/float(count_sum)
+                kmer_freqs_mat[i,start_ind:start_ind+len(count_list)] = count_list
+                start_ind += len(count_list)
+    return kmer_freqs_mat
 
-    kmer_freqs = np.array(kmer_freqs, dtype=float)
-    row_sums = np.sum(kmer_freqs,axis=1,keepdims=True)
-    kmer_freqs = np.where(row_sums>0, np.divide(kmer_freqs,row_sums,dtype=float),0)
-    return kmer_freqs
+
+    # def counts2freqs(kmer_counts, ks):
+    #     ''' Return a vector of the frequencies of k-mer occurences in a sequence
+    #     Parameters: kmer_counts - dictionary of the kmer counts for the sequence,
+    #                               or list of dictionaries for all the sequences
+    #                 ks - sorted list of the k-mer lengths
+    #     Returns numpy array of frequencies
+    #     '''
+    #     kmers_lists = get_kmer_lists(ks)
+    #
+    #     print "Converting counts to frequencies"
+    #
+    #     if isinstance(kmer_counts,dict): # single sequence
+    #         all_kmer_freqs = []
+    #         for i,k in enumerate(ks):
+    #             count_list = [kmer_counts[k].get(kmer,0) for kmer in kmers_lists[i]]
+    #             count_sum = sum(count_list)
+    #             if count_sum != 0:
+    #                 kmer_freqs = np.array(count_list,dtype=float)/float(count_sum)
+    #             else:
+    #                 kmer_freqs = np.zeros(len(count_list))
+    #             all_kmer_freqs = np.hstack([all_kmer_freqs,kmer_freqs])
+    #
+    #     elif isinstance(kmer_counts,list): # set of sequences
+    #         kmer_freqs_mat = np.zeros((len(kmer_counts),sum([len(klist) for klist in kmers_lists])))
+    #         for i,c in enumerate(kmer_counts):
+    #             all_kmer_freqs = np.array([])
+    #             for j,k in enumerate(ks):
+    #                 count_list = [c[k].get(kmer,0) for kmer in kmers_lists[j]]
+    #                 count_sum = sum(count_list)
+    #                 if count_sum != 0:
+    #                     kmer_freqs = np.array(count_list,dtype=float)/float(count_sum)
+    #                 else:
+    #                     kmer_freqs = np.zeros(len(count_list))
+    #                 all_kmer_freqs = np.hstack([all_kmer_freqs,kmer_freqs])
+    #             kmer_freqs_mat[i,:] = all_kmer_freqs
+    #     return kmer_freqs_mat

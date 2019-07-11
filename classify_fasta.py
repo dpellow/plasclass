@@ -57,10 +57,15 @@ def main(args):
                     o.write(str(p) + '\n')
                 seq_names = []
                 seqs = []
+        # last bunch of sequences:
+        print "Read {} sequences".format(i)
+        probs = c.classify(seqs)
+        for j,p in enumerate(probs):
+            o.write('>'+seq_names[j]+ '\n')
+            o.write(str(p) + '\n')
     fp.close()
     print "Finished classifying"
     print "Class scores written in: {}".format(outfile)
-
 
 
 if __name__=='__main__':
