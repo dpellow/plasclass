@@ -144,13 +144,12 @@ def get_kmer_lists(ks):
         low_kmers.sort()
         all_low_kmers.append(low_kmers)
     return all_low_kmers
-
+#
 def count_kmers(seq, ks, kmer_lists, kmer_inds):
     ''' Count the k-mers in the sequence
         Return a dictionary of counts
         Assumes ks is sorted
     '''
-
     kmer_counts = {k:np.zeros(len(kmer_lists[i])) for i,k in enumerate(ks)}
 
     k_masks = [2**(2*k)-1 for k in ks]
@@ -170,17 +169,16 @@ def count_kmers(seq, ks, kmer_lists, kmer_inds):
                 ind += 1
                 break
         if k == ks[-1]:
-            ind += 1
             break
     # count all other kmers
-    while ind<=len(seq)-ks[-1]: # iterate through sequence until last k-mer for largest k
+    while ind<len(seq)-ks[-1]: # iterate through sequence until last k-mer for largest k
         for i,k in enumerate(ks):
             try:
                 c = nt_bits[seq[ind+k]]
                 rc = 3^c
                 bit_mers[i] = ((bit_mers[i]<<2)|c)&k_masks[i]
                 rc_bit_mers[i] = ((rc_bit_mers[i]>>2)|rc<<(2*k-2))
-                canonical = min(bit_mer,rc_bit_mer)
+                canonical = min(bit_mers[i],rc_bit_mers[i])
                 kmer_counts[k][kmer_inds[k][canonical]] += 1.
             except: # out of alphabet
                 ind += 1
@@ -213,6 +211,7 @@ def count_kmers(seq, ks, kmer_lists, kmer_inds):
         end -= 1
 
     return kmer_counts
+
 
 
 def counts2freqs(kmer_counts, ks):

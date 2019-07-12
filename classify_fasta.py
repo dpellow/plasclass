@@ -57,6 +57,8 @@ def main(args):
                     o.write(str(p) + '\n')
                 seq_names = []
                 seqs = []
+
+
         # last bunch of sequences:
         print "Read {} sequences".format(i)
         probs = c.classify(seqs)
