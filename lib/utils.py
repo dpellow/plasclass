@@ -58,11 +58,14 @@ def mer2bits(kmer):
     return bit_mer
 
 
-def count_kmers(seq, ks, kmer_inds, vec_lens):
+def count_kmers(args_array):
+#def count_kmers(seq, ks, kmer_inds, vec_lens):
     ''' Count the k-mers in the sequence
         Return a dictionary of counts
         Assumes ks is sorted
     '''
+    seq, ks, kmer_inds, vec_lens = args_array
+
     kmer_counts = {k:np.zeros(vec_lens[k]) for k in ks}
 
     k_masks = [2**(2*k)-1 for k in ks]

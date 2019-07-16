@@ -36,11 +36,10 @@ def main(args):
     if args.outfile: outfile = args.outfile
     else: outfile = infile + '.probs.out'
 
-    c = classifier.classifier()
+    c = classifier.classifier(12)
     seq_names = []
     seqs = []
-    print "Classifying {} in batches of 100k sequences".format(infile)
-    print "Reading in the input fasta"
+    print "Reading {} in batches of 100k sequences".format(infile)
     i = 0
     # TODO: buffer this and run classification on batches (say ~10k sequences at a time)
     fp = open(infile)
