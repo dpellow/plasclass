@@ -58,24 +58,6 @@ def mer2bits(kmer):
     return bit_mer
 
 
-def get_kmer_lists(ks):
-    ''' Return a list of sorted lists of the lexicographically minimum of each kmer and
-    its reverse complement for all the values of k in ks
-    Assumes ks sorted increasing
-    '''
-    alphabet = 'ACGT'
-    all_low_kmers = []
-    for k in ks:
-        low_kmers = []
-        all_kmers = [''.join(kmer) for kmer in itertools.product(alphabet,repeat=k)]
-        for kmer in all_kmers:
-            low_kmers.append(min(mer2bits(kmer), mer2bits(get_rc(kmer))))
-        low_kmers = list(set(low_kmers)) # deduplicate
-        low_kmers.sort()
-        all_low_kmers.append(low_kmers)
-    return all_low_kmers
-
-
 def count_kmers(seq, ks, kmer_inds, vec_lens):
     ''' Count the k-mers in the sequence
         Return a dictionary of counts
@@ -100,7 +82,7 @@ def count_kmers(seq, ks, kmer_inds, vec_lens):
                 break
         if found == True:
             break
-      
+
     # count all other kmers
     while ind<len(seq)-ks[-1]: # iterate through sequence until last k-mer for largest k
         for i,k in enumerate(ks):
@@ -137,38 +119,14 @@ def count_kmers(seq, ks, kmer_inds, vec_lens):
                 pass
         end -= 1
 
-    return kmer_counts
+    #normalise counts
+    kmer_freqs = np.zeros(sum([vec_lens[k] for k in ks]))
+    ind = 0
+    for k in ks:
+        counts_sum = np.sum(kmer_counts[k])
+        if counts_sum != 0:
+            kmer_counts[k] = kmer_counts[k]/float(counts_sum)
+        kmer_freqs[ind:ind+vec_lens[k]] = kmer_counts[k]
+        ind += vec_lens[k]
 
-
-
-def counts2freqs(kmer_counts, ks):
-    ''' Return a vector of the frequencies of k-mer occurences in a sequence
-    Parameters: kmer_counts - dictionary of the kmer counts for the sequence,
-                              or list of dictionaries for all the sequences
-                ks - sorted list of the k-mer lengths
-    Returns numpy array of frequencies
-    '''
-
-    print "Converting counts to frequencies"
-
-    if isinstance(kmer_counts,dict): # single sequence
-        all_kmer_freqs = []
-        for i,k in enumerate(ks):
-            count_list = kmer_counts[k]
-            count_sum = np.sum(count_list)
-            if count_sum != 0:
-                count_list = count_list/float(count_sum)
-            all_kmer_freqs = np.hstack([all_kmer_freqs,count_list])
-
-    elif isinstance(kmer_counts,list): # set of sequences
-        kmer_freqs_mat = np.zeros((len(kmer_counts),sum([len(kmer_counts[0][k]) for k in ks])))
-        for i,c in enumerate(kmer_counts):
-            start_ind = 0
-            for j,k in enumerate(ks):
-                count_list = c[k]
-                count_sum = np.sum(count_list)
-                if count_sum != 0:
-                    count_list = count_list/float(count_sum)
-                    kmer_freqs_mat[i,start_ind:start_ind+len(count_list)] = count_list
-                    start_ind += len(count_list)
-    return kmer_freqs_mat
+    return kmer_freqs
