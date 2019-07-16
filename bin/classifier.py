@@ -46,37 +46,30 @@ class classifier():
             seq_ind = 0
             pool = mp.Pool(self._n_procs)
             while seq_ind < len(seq):
-                time1 = time.time()
                 print "Starting new batch"
                 seq_batch = seq[seq_ind:seq_ind + 100000]
-                print "Getting kmer frequencies"
-#                kmer_freqs_mat = np.zeros((len(seq_batch),sum([self._kmer_count_lens[k] for k in self._ks])))
-
-                scales = [self._get_scale(len(s)) for s in seq_batch]
-
-                kmer_freqs_mat = np.array(pool.map(utils.count_kmers, [[s, self._ks, self._kmer_inds, self._kmer_count_lens] for s in seq_batch]))
-
-                time2 = time.time()
-                print time2-time1
-
-                # separate by length scale
-                partitioned_classifications = {}
                 print "Partitioning by length scale"
-                for s in self._scales:
-                    # select the rows of kmer_freqs that are of this scale
-                    scale_freqs = kmer_freqs_mat[[x == s for x in scales],:]
-                    if len(scale_freqs) <= 0: continue
-                    standardized_freqs = self._standardize(scale_freqs, s)
-                    print "Classifying sequences of length scale {}".format(s)
-                    partitioned_classifications[s] = self.classifiers[s]['clf'].predict_proba(standardized_freqs)[:,1]
-                time3 = time.time()
-                print time3-time2
+                scales = [self._get_scale(len(s)) for s in seq_batch]
+                scale_partitions = {s: [seq_batch[i] for i,v in enumerate(scales) if v == s] for s in self._scales}
+
+                partitioned_classifications = {}
+                for scale in scale_partitions:
+                    part_seqs = scale_partitions[scale]
+                    if len(part_seqs) <= 0: continue
+                    print "Getting kmer frequencies for scale {}".format(scale)
+                    kmer_freqs_mat = np.array(pool.map(utils.count_kmers, [[s, self._ks, self._kmer_inds, self._kmer_count_lens] for s in part_seqs]))
+                    standardized_freqs = self._standardize(kmer_freqs_mat, scale)
+                    print "Classifying sequences of length scale {}".format(scale)
+                    partitioned_classifications[scale] = self.classifiers[scale]['clf'].predict_proba(standardized_freqs)[:,1]
+
                 # recollate the results:
                 scale_inds = {s:0 for s in self._scales}
                 for s in scales:
                     results.append(partitioned_classifications[s][scale_inds[s]])
                     scale_inds[s] += 1
+
                 seq_ind += 100000
+
             pool.close()
             return np.array(results)
 
