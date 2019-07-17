@@ -64,7 +64,7 @@ def count_kmers(args_array):
         Return a dictionary of counts
         Assumes ks is sorted
     '''
-    seq, ks, kmer_inds, vec_lens = args_array
+    ret_ind, seq, ks, kmer_inds, vec_lens, shared_list = args_array
 
     kmer_counts = {k:np.zeros(vec_lens[k]) for k in ks}
 
@@ -132,4 +132,5 @@ def count_kmers(args_array):
         kmer_freqs[ind:ind+vec_lens[k]] = kmer_counts[k]
         ind += vec_lens[k]
 
-    return kmer_freqs
+    shared_list[ret_ind] = kmer_freqs
+    #return kmer_freqs

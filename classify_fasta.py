@@ -36,7 +36,8 @@ def main(args):
     if args.outfile: outfile = args.outfile
     else: outfile = infile + '.probs.out'
 
-    c = classifier.classifier(12)
+#    c = classifier.classifier(2)
+    c = classifier.classifier()
     seq_names = []
     seqs = []
     print "Reading {} in batches of 100k sequences".format(infile)
