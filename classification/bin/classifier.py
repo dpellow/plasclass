@@ -83,8 +83,8 @@ class classifier():
     def _load_classifiers(self):
         ''' Load the multi-scale classifiers and scalers
         '''
-        data_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'data')
-
+        parent_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        data_path = os.path.join(parent_path,os.path.join('classification','data'))
         self.classifiers = {}
         for i in self._scales:
             print "Loading classifier " + str(i)
