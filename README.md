@@ -42,5 +42,6 @@ my_classifier = classifier()
 my_classifier.classify(seqs)
 ```
 The `classifier()` constructor takes an optional parameter of the number of processes to use for classification. The default is 1.
-The sequence(s) to classify, `seqs`, can be either a single string or a list of strings, and must be in uppercase.
+
+The sequence(s) to classify, `seqs`, can be either a single string or a list of strings. The strings must be uppercase.
 
