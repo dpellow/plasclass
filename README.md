@@ -4,7 +4,7 @@ For examlpe, it can be used to classify the contigs in a (metagenomic) assembly.
 
 ## Installation
 
-To install, download and install using setup.py:
+To install, download and run setup.py:
 
     git clone https://github.com/dpellow/classification.git
     cd classification
