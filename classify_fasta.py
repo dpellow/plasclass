@@ -2,8 +2,8 @@
 # Provide a command line script to classify sequences in a fasta file
 ###
 
-from lib import classifier_utils as utils
-from bin import classifier
+from classification import classifier_utils as utils
+from classification import classifier
 
 import argparse
 
