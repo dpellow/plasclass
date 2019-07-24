@@ -12,9 +12,7 @@ from joblib import load
 import multiprocessing as mp
 from multiprocessing import Manager
 
-import pkg_resources
-
-from classification.lib import classifier_utils as utils
+from lib import classifier_utils as utils
 
 class classifier():
     def __init__(self,n_procs = 1):
@@ -86,8 +84,8 @@ class classifier():
         ''' Load the multi-scale classifiers and scalers
         '''
         parent_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        data_path = os.path.join(parent_path,'data')
     #    data_path = os.path.join(parent_path,os.path.join('classification','data'))
-        data_path = pkg_resources.resource_filename('classification', 'data')
         self.classifiers = {}
         for i in self._scales:
             print "Loading classifier " + str(i)
