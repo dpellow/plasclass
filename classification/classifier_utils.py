@@ -57,7 +57,6 @@ def mer2bits(kmer):
 
 
 def count_kmers(args_array):
-#def count_kmers(seq, ks, kmer_inds, vec_lens):
     ''' Count the k-mers in the sequence
         Return a dictionary of counts
         Assumes ks is sorted

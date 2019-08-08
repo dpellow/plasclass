@@ -17,7 +17,7 @@ import classifier_utils as utils
 class classifier():
     def __init__(self,n_procs = 1):
         self._scales = [1000,10000,100000,500000]
-        self._ks = {1000: [3,4,5,6], 5000: [3,4,5,6,7], 10000 : [3,4,5,6,7], 100000 : [3,4,5,6,7], 500000 : [3,4,5,6,7]}
+        self._ks = [3,4,5,6,7]
         self._compute_kmer_inds()
         self._load_classifiers()
         self._n_procs = n_procs
@@ -33,7 +33,7 @@ class classifier():
             print "Counting k-mers for sequence of length {}".format(len(seq))
             kmer_freqs = [0]
             scale = self._get_scale(len(seq))
-            utils.count_kmers([0, seq, self._ks[scale], self._kmer_inds, self._kmer_count_lens, kmer_freqs])
+            utils.count_kmers([0, seq, self._ks, self._kmer_inds, self._kmer_count_lens, kmer_freqs])
             kmer_freqs = np.array(kmer_freqs)
             standardized_freqs = self._standardize(kmer_freqs, scale)
             print "Classifying"
@@ -60,7 +60,7 @@ class classifier():
                     shared_list=Manager().list()
                     for cur in np.arange(len(part_seqs)):
                         shared_list.append(0)
-                    pool.map(utils.count_kmers, [[ind, s, self._ks[scale], self._kmer_inds[scale], self._kmer_count_lens[scale], shared_list] for ind,s in enumerate(part_seqs)])
+                    pool.map(utils.count_kmers, [[ind, s, self._ks, self._kmer_inds, self._kmer_count_lens, shared_list] for ind,s in enumerate(part_seqs)])
                     kmer_freqs_mat = np.array(shared_list)
                     standardized_freqs = self._standardize(kmer_freqs_mat, scale)
                     print "Classifying sequences of length scale {}".format(scale)
@@ -95,11 +95,9 @@ class classifier():
     def _get_scale(self, length):
         ''' Choose which length scale to use for the sequence
         '''
-        #TODO: binary search to make this more efficient
         if length <= self._scales[0]: return self._scales[0]
         for i,l in enumerate(self._scales[:-1]):
              if length <= float(l + self._scales[i+1])/2.0:
-        #     if length < self._scales[i+1]:
                 return l
         return self._scales[-1]
 
@@ -113,22 +111,20 @@ class classifier():
         ''' Compute the indeces of each canonical kmer in the kmer count vectors
         '''
 
-        self._kmer_inds = {scale: {k: {} for k in self._ks[scale]} for scale in self._ks.keys()}
-        self._kmer_count_lens = {scale:{k: 0 for k in self._ks[scale]} for scale in self._ks.keys()}
+        self._kmer_inds = {k: {} for k in self._ks}
+        self._kmer_count_lens = {k: 0 for k in self._ks}
 
         alphabet = 'ACGT'
-        for scale in self._ks.keys():
-            for k in self._ks[scale]:
-
-                all_kmers = [''.join(kmer) for kmer in itertools.product(alphabet,repeat=k)]
-                all_kmers.sort()
-                ind = 0
-                for kmer in all_kmers:
-                    bit_mer = utils.mer2bits(kmer)
-                    rc_bit_mer = utils.mer2bits(utils.get_rc(kmer))
-                    if rc_bit_mer in self._kmer_inds[scale][k]:
-                        self._kmer_inds[scale][k][bit_mer] = self._kmer_inds[scale][k][rc_bit_mer]
-                    else:
-                        self._kmer_inds[scale][k][bit_mer] = ind
-                        self._kmer_count_lens[scale][k] += 1
-                        ind += 1
+        for k in self._ks:
+            all_kmers = [''.join(kmer) for kmer in itertools.product(alphabet,repeat=k)]
+            all_kmers.sort()
+            ind = 0
+            for kmer in all_kmers:
+                bit_mer = utils.mer2bits(kmer)
+                rc_bit_mer = utils.mer2bits(utils.get_rc(kmer))
+                if rc_bit_mer in self._kmer_inds[k]:
+                    self._kmer_inds[k][bit_mer] = self._kmer_inds[k][rc_bit_mer]
+                else:
+                    self._kmer_inds[k][bit_mer] = ind
+                    self._kmer_count_lens[k] += 1
+                    ind += 1
