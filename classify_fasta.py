@@ -2,8 +2,8 @@
 # Provide a command line script to classify sequences in a fasta file
 ###
 
-from classification import classifier_utils as utils
-from classification import classifier
+from plasclass import plasclass_utils as utils
+from plasclass import plasclass
 
 import argparse
 
@@ -38,7 +38,7 @@ def main(args):
     else: outfile = infile + '.probs.out'
     n_procs = args.num_processes
 
-    c = classifier.classifier(n_procs)
+    c = plasclass.plasclass(n_procs)
     seq_names = []
     seqs = []
     print "Reading {} in batches of 100k sequences".format(infile)
