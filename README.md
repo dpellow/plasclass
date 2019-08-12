@@ -4,21 +4,28 @@ For example, it can be used to classify the contigs in a (metagenomic) assembly.
 
 ## Installation
 
+`classification` is written in Python2.7 and requires NumPy and scikit-learn (versions compatible with Python2.7) and their dependencies. These will be installed by the setup.py script.
+
+We recommend using a virtual environment. For example, before running setup.py:
+```
+python -m virtualenv classification-env
+source classification-env/bin/activate
+```
+
 To install, download and run setup.py:
 
     git clone https://github.com/dpellow/classification.git
     cd classification
     python setup.py install
 
+If not using a virtual environment, it is possible to install as a user without root permissions:
+```
+python setup.py install --user
+```
+
+
 <!--- `classification` can also be installed using `pip`. Just do `pip install classification` --->
 
-We recommend doing this in a virtual environment. For example, before running setup.py:
-```
-python -m virtualenv classification-env
-source classification-env/bin/activate
-```
-
-`classification` is written in Python2.7 and requires NumPy and scikit-learn (versions compatible with Python2.7) and their dependencies. These will be installed by the setup.py script.
 
 ## Usage
 
