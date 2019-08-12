@@ -1,4 +1,4 @@
-# Utility functions for the classifier module
+# Utility functions for the plasclass module
 
 complements = {'A':'T', 'C':'G', 'G':'C', 'T':'A'}
 nt_bits = {'A':0,'C':1,'G':2,'T':3}

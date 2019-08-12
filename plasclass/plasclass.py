@@ -1,5 +1,5 @@
 ###
-# Define the classifier class and provide a set of functions to enable classification
+# Define the plasclass class and provide a set of functions to enable classification
 ###
 
 import numpy as np
@@ -48,12 +48,11 @@ class plasclass():
             while seq_ind < len(seq):
                 print "Starting new batch"
                 seq_batch = seq[seq_ind:seq_ind + 100000]
-                print "Partitioning by length"
                 scales = [self._get_scale(len(s)) for s in seq_batch]
                 scale_partitions = {s: [seq_batch[i] for i,v in enumerate(scales) if v == s] for s in self._scales}
 
                 partitioned_classifications = {}
-                for scale in self._scales: #scale_partitions:
+                for scale in self._scales:
                     part_seqs = scale_partitions[scale]
                     if len(part_seqs) <= 0: continue
                     print "Getting kmer frequencies for partition length {}".format(scale)
@@ -74,7 +73,7 @@ class plasclass():
 
                 seq_ind += 100000
 
-            # pool.close() TODO: is this needed?
+            # pool.close()
             return np.array(results)
 
         else:

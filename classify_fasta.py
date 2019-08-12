@@ -43,7 +43,6 @@ def main(args):
     seqs = []
     print "Reading {} in batches of 100k sequences".format(infile)
     i = 0
-    # TODO: buffer this and run classification on batches (say ~10k sequences at a time)
     fp = open(infile)
     with open(outfile,'w') as o:
         for name, seq, _ in utils.readfq(fp):
@@ -69,7 +68,6 @@ def main(args):
     fp.close()
     print "Finished classifying"
     print "Class scores written in: {}".format(outfile)
-
 
 if __name__=='__main__':
     args = parse_user_input()
