@@ -14,7 +14,7 @@ source classification-env/bin/activate
 
 To install, download and run setup.py:
 
-    git clone https://github.com/dpellow/classification.git
+    git clone https://github.com/dpellow/plasclass.git
     cd classification
     python setup.py install
 
