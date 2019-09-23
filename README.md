@@ -56,7 +56,7 @@ from plasclass import plasclass
 my_classifier = plasclass()
 my_classifier.classify(seqs)
 ```
-The `classifier()` constructor takes an optional parameter of the number of processes to use for classification. The default is 1.
+The `plasclass()` constructor takes an optional parameter of the number of processes to use for classification. The default is 1.
 
 The sequence(s) to classify, `seqs`, can be either a single string or a list of strings. The strings must be uppercase.
 
