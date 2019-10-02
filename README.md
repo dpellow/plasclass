@@ -37,7 +37,7 @@ The command line options for this script are:
 
 `-f/--fasta`: The fasta file to be classified
 
-`-o/--outfile`: The name of the output file. If not specified, <input filename>.probs.out
+`-o/--outfile`: The name of the output file. If not specified, \<input filename\>.probs.out
 
 `-p/--num_processes`: The number of processes to use. Default=8
 
