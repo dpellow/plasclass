@@ -41,14 +41,7 @@ The command line options for this script are:
 
 `-p/--num_processes`: The number of processes to use. Default=8
 
-The format of the output file will be similar to the fasta format:\
-Each header line starts with '>' and contains the sequence name matching that in the input file.\
-Each header line is followed by a line with the plasmid score between 0 (not plasmid) and 1 (plasmid). \
-The sequences will be classified in the same order as they appear in the fasta.
-
-For example:
-> \>AE015451.2\
-0.13815347569215672
+The output file is a tab separated file with each line containing a sequence header and the corresponding score. The sequences are in the same order as in the input fasta file. 
 
 The classifier can also be imported and used directly in your own python code. For example, once the `plasclass` module has been installed you can use the following lines in your own code:
 ```
