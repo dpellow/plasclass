@@ -53,8 +53,9 @@ def main(args):
                 print "Read {} sequences".format(i)
                 probs = c.classify(seqs)
                 for j,p in enumerate(probs):
-                    o.write('>'+seq_names[j]+ '\n')
-                    o.write(str(p) + '\n')
+                    o.write(seq_names[j] + '\t' + str(p) + '\n')
+                #    o.write('>'+seq_names[j]+ '\n')
+                #    o.write(str(p) + '\n')
                 seq_names = []
                 seqs = []
 
@@ -63,8 +64,9 @@ def main(args):
         print "Read {} sequences".format(i)
         probs = c.classify(seqs)
         for j,p in enumerate(probs):
-            o.write('>'+seq_names[j]+ '\n')
-            o.write(str(p) + '\n')
+            o.write(seq_names[j] + '\t' + str(p) + '\n')
+        #    o.write('>'+seq_names[j]+ '\n')
+        #    o.write(str(p) + '\n')
     fp.close()
     print "Finished classifying"
     print "Class scores written in: {}".format(outfile)
