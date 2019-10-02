@@ -1,4 +1,4 @@
-# classification
+# PlasClass
 This module allows for easy classification of sequences as either plasmid or chromosomal.
 For example, it can be used to classify the contigs in a (metagenomic) assembly.
 
@@ -14,8 +14,8 @@ source classification-env/bin/activate
 
 To install, download and run setup.py:
 
-    git clone https://github.com/dpellow/classification.git
-    cd classification
+    git clone https://github.com/dpellow/plasclass.git
+    cd plasclass
     python setup.py install
 
 If not using a virtual environment, it is possible to install as a user without root permissions:
@@ -50,15 +50,15 @@ For example:
 > \>AE015451.2\
 0.13815347569215672
 
-The classifier can also be imported and used directly in your own python code. For example, once the `classification` module has been installed you can use the following lines in your own code:
+The classifier can also be imported and used directly in your own python code. For example, once the `plasclass` module has been installed you can use the following lines in your own code:
 ```
-from classification import classifier
-my_classifier = classifier()
+from plasclass import plasclass
+my_classifier = plasclass()
 my_classifier.classify(seqs)
 ```
-The `classifier()` constructor takes an optional parameter of the number of processes to use for classification. The default is 1.
+The `plasclass()` constructor takes an optional parameter of the number of processes to use for classification. The default is 1.
 
 The sequence(s) to classify, `seqs`, can be either a single string or a list of strings. The strings must be uppercase.
 
-The function `classifier.classify(seqs)` returns a list of plasmid scores, one per input sequence, in the same order as the input.
+The function `plasclass.classify(seqs)` returns a list of plasmid scores, one per input sequence, in the same order as the input.
 
