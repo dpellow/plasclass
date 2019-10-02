@@ -1,3 +1,6 @@
+# THE CODE IN THIS REPOSITORY HAS BEEN MOVED AND IS NOW MAINTAINED AT: https://github.com/Shamir-Lab/PlasClass
+
+
 # PlasClass
 This module allows for easy classification of sequences as either plasmid or chromosomal.
 For example, it can be used to classify the contigs in a (metagenomic) assembly.
